@@ -37,10 +37,15 @@ conda activate mdlm
 建議使用 `python -m pip`，確保套件安裝到目前啟用的 Conda 環境。
 
 [causal-conv1d](https://github.com/Dao-AILab/causal-conv1d/releases?page=3)
+
 下載causal_conv1d-1.1.3.post1+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
+
 [mamba](https://github.com/state-spaces/mamba/releases?page=3)
+
 下載mamba_ssm-1.1.4+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
+
 [flash-attention](https://github.com/Dao-AILab/flash-attention/releases?page=6)
+
 下載flash_attn-2.5.6+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
 
 ```bash
