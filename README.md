@@ -15,7 +15,7 @@ cd mdlm-sdc
 ## 1.2 建立 Conda 環境
 
 ```bash
-conda env create -f mdlm_environment.yaml
+conda env create -f mdlm_environment.yml
 ```
 
 ## 1.3 啟用環境
