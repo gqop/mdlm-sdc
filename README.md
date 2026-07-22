@@ -2,6 +2,25 @@
 
 本文件說明如何建立執行環境、下載 checkpoint、進行訓練，以及執行 Perplexity 與 Generative Perplexity 評估。
 
+## 模型架構說明
+
+本專案的所有 MDLM-SDC 實驗皆使用：
+
+```yaml
+backbone: dit
+```
+
+也就是以 **Diffusion Transformer（DiT）** 作為模型 backbone。
+
+本專案沒有使用以下 backbone：
+
+```yaml
+backbone: dimamba
+backbone: ar
+```
+
+因此，本文提供的 checkpoint、訓練腳本及評估結果皆以 DiT 為準，不保證能直接套用至 DiMamba 或 Autoregressive backbone。
+
 ---
 
 # 1. 環境安裝
@@ -26,36 +45,84 @@ conda activate mdlm
 
 ## 1.4 安裝額外套件
 
-以下 wheel 對應：
+以下預編譯 wheel 對應：
 
-- Python 3.9
-- PyTorch 2.2
-- CUDA 11.8
-- CXX11 ABI = False
-- Linux x86_64
+* Python 3.9
+* PyTorch 2.2
+* CUDA 11.8
+* CXX11 ABI = False
+* Linux x86_64
 
-建議使用 `python -m pip`，確保套件安裝到目前啟用的 Conda 環境。
+建議使用 `python -m pip`，確保套件安裝至目前啟用的 Conda 環境。
 
-[causal-conv1d](https://github.com/Dao-AILab/causal-conv1d/releases?page=3)
+### 必要套件：FlashAttention
 
-下載causal_conv1d-1.1.3.post1+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
+本專案實驗使用 DiT backbone，因此需要安裝與目前環境相容的 FlashAttention。
 
-[mamba](https://github.com/state-spaces/mamba/releases?page=3)
-
-下載mamba_ssm-1.1.4+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
+下載位置：
 
 [flash-attention](https://github.com/Dao-AILab/flash-attention/releases?page=6)
 
-下載flash_attn-2.5.6+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
+下載檔案：
+
+```text
+flash_attn-2.5.6+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
+```
+
+安裝方式：
 
 ```bash
-python -m pip install   causal_conv1d-1.1.3.post1+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
-
-python -m pip install   mamba_ssm-1.1.4+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
- 
-python -m pip install   flash_attn-2.5.6+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
+python -m pip install \
+  flash_attn-2.5.6+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
 ```
----
+
+### 選用套件：DiMamba 相關依賴
+
+以下套件主要提供給 `dimamba` backbone 使用：
+
+* `causal-conv1d`
+* `mamba-ssm`
+
+本專案的 MDLM-SDC 實驗只使用：
+
+```yaml
+backbone: dit
+```
+
+因此，正常情況下不會使用 Mamba 的 selective scan 或 causal convolution 功能。
+
+只有在需要執行：
+
+```yaml
+backbone: dimamba
+```
+
+時，才需要另外下載並安裝以下套件。
+
+下載位置：
+
+* [causal-conv1d](https://github.com/Dao-AILab/causal-conv1d/releases?page=3)
+* [mamba-ssm](https://github.com/state-spaces/mamba/releases?page=3)
+
+對應檔案：
+
+```text
+causal_conv1d-1.1.3.post1+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
+
+mamba_ssm-1.1.4+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
+```
+
+安裝方式：
+
+```bash
+python -m pip install \
+  causal_conv1d-1.1.3.post1+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
+
+python -m pip install \
+  mamba_ssm-1.1.4+cu118torch2.2cxx11abiFALSE-cp39-cp39-linux_x86_64.whl
+```
+
+> 注意：專案中的 `models/__init__.py` 可能會在啟動時直接載入 `models.dimamba`。在未修改原始 import 邏輯的情況下，即使設定為 `backbone: dit`，仍可能因未安裝 `mamba_ssm` 而出現 `ModuleNotFoundError`。
 
 # 2. Checkpoint
 
